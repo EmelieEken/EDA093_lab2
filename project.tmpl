@@ -71,13 +71,21 @@ just a small amount of time on threads that are not asleep.
 >> A4: How are race conditions avoided when multiple threads call
 >> timer_sleep() simultaneously?
 
+In order to call timer_sleep() you must have turned interupts off. This means that the thread won't be 
+interupted during this function call and will have its variable ticks_to_sleep set and its status set to 
+blocked before the next thread can do the same thing.
+
 >> A5: How are race conditions avoided when a timer interrupt occurs
 >> during a call to timer_sleep()?
+
+
 
 ---- RATIONALE ----
 
 >> A6: Why did you choose this design?  In what ways is it superior to
 >> another design you considered?
+
+
 
 			    BATCH SCHEDULING
 			    ================
