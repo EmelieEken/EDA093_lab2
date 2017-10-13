@@ -56,8 +56,15 @@ struct thread
 >> A2: Briefly describe what happens in a call to timer_sleep(),
 >> including the effects of the timer interrupt handler.
 
+When timer_sleep(int ticks) is called and ticks>0 the threads ticks_to_sleep variable is set to ticks and 
+the thread's status is set to blocked (thread_block() is called). Otherwise nothing happens.
+
 >> A3: What steps are taken to minimize the amount of time spent in
 >> the timer interrupt handler?
+
+In the timer interupt handler we call thread_foreach and pass on the thread_decrease_sleep function which 
+first checks if the thread is actually asleep (blocked and with ticks_to_sleep > 0). This ensures that we spend 
+just a small amount of time on threads that are not asleep.
 
 ---- SYNCHRONIZATION ----
 
