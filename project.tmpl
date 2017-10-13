@@ -97,24 +97,42 @@ int currentDirection; //either 0 or 1
 int slotsFree; // 0 <= slotsFree <= BUS_CAPACITY
 
 ---- SYNCHRONIZATION ----
-
 >> C1: How does your solution guarantee that no more that 3 tasks
 >> are using the bus in the same direction?
+In getSlot() we force the thread to wait (and release the lock as well) if slotsFree==0 
 
 >> C2: What prevents tasks from opposite directions from using the
 >> bus simultaneously?
+We use a shared variable which represents the current direction of the tasks that are on the bus. 
+Whenever a bus tries to get a slot, will check if the current direction is different by its.
+If true, the thread will wait and release the lock
+
 
 >> C3: How does your solution grant priority to high priority tasks over
 >> the waiting tasks in the same direction?
+When a task tries to get the slot, in the while condition we check also if task.direction == NORMAL
+and there are priority task of the same direction in the wating list, the current thread will wait.
+When a task leaves the slot, will check first if there are high priority tasks, with current direction, waiting
+and if it's true one of them will be signaled.
 
 >> C4: How do you guarantee that despite having priority, high priority
 >> tasks do not start using the bus while there are still still using
 >> it in the oposite direction?
+When a high priority task tries to get a slot, will acquire the lock and check the shared var currentDirection if its equal to its own direction.
+If it's not, the thread will wait and release the lock.
+When a task is leaving the slot, after acquiring the lock, will check first if there are priority tasks waiting in the currentDirection,
+and signal one of them if true, then will check if there are priority tasks wating in the opposite direction, but they will get
+broadcasted only if all slots are free
 
 ---- RATIONALE ----
 
->> C6: Why did you choose this design? Did you consider other design
+> C6: Why did you choose this design? Did you consider other design
 >> alternatives? In what ways is it superior to another design you considered?
+We choose this design because it's very similar to the Old Bridge problem, but with some more logic as we had to deal with
+priority. An alternative I was thinking about was to use only two cond vars, one for each direction and sort the list in order
+to have priority task first, this would have required creating a comparator function, and probably it would have been very time
+consuming due to Θ(nlogn) time each sort invoke. So we think our solution is superior due to simplicity and also computing time
+than the sorting one.
 
 
 			   SURVEY QUESTIONS (optional)
@@ -128,9 +146,11 @@ the quarter.
 
 >> In your opinion, was this assignment, or any one of the three problems
 >> in it, too easy or too hard?  Did it take too long or too little time?
+Was very challenging and interesting due to the logic work behind synch problem.
 
 >> Did you find that working on a particular part of the assignment gave
 >> you greater insight into some aspect of OS design?
+Yes, definitely. I understood a lot about OS and multi-threaded programming as well
 
 >> Is there some particular fact or hint we should give students in
 >> future quarters to help them solve the problems?  Conversely, did you
